@@ -1,0 +1,19 @@
+// CoNinja Coworking: static site on Cloudflare Workers (static assets).
+// Deploy with `npm run deploy` (builds, checks, then uploads dist/).
+{
+  "name": "coninja-coworking",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    // Serve /privacy for privacy.html and redirect /privacy.html to /privacy
+    "html_handling": "auto-trailing-slash",
+    // Unknown URLs get dist/404.html with a real 404 status
+    "not_found_handling": "404-page"
+  },
+  // Only the custom domain serves the site: no duplicate *.workers.dev copy for Google to index
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "coninjacoworking.com", "custom_domain": true }
+  ]
+}

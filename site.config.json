@@ -1,0 +1,12 @@
+{
+  "url": "https://coninjacoworking.com",
+  "pages": [
+    { "file": "index.html", "path": "/", "priority": "1.0", "changefreq": "weekly" },
+    { "file": "private-office-islamabad.html", "path": "/private-office-islamabad", "priority": "0.8", "changefreq": "monthly" },
+    { "file": "team-office-space-islamabad.html", "path": "/team-office-space-islamabad", "priority": "0.8", "changefreq": "monthly" },
+    { "file": "privacy.html", "path": "/privacy", "priority": "0.2", "changefreq": "yearly" },
+    { "file": "terms.html", "path": "/terms", "priority": "0.2", "changefreq": "yearly" },
+    { "file": "404.html", "path": null }
+  ],
+  "imageWidths": [320, 480, 640, 800, 1200]
+}

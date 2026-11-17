@@ -1,0 +1,27 @@
+{
+  "name": "coninja-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CoNinja Coworking website: coworking space and private offices in E-11/3, Islamabad.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "preview": "SITE_URL=http://localhost:4322 node scripts/build.mjs && serve dist --listen 4322 --config ../serve.json",
+    "check": "node scripts/check.mjs",
+    "build:cloudflare": "TARGET=cloudflare node scripts/build.mjs",
+    "deploy": "npm run build:cloudflare && npm run check && wrangler deploy && wrangler deploy -c workers/www-redirect/wrangler.jsonc"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "html-minifier-terser": "^7.2.0",
+    "serve": "^14.2.6",
+    "sharp": "^0.35.5",
+    "wrangler": "^4.160.0"
+  },
+  "overrides": {
+    "compression": "^1.8.2"
+  }
+}

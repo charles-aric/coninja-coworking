@@ -1,0 +1,11 @@
+// Redirect worker for www.coninjacoworking.com -> coninjacoworking.com
+{
+  "name": "coninja-www-redirect",
+  "main": "index.js",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "www.coninjacoworking.com", "custom_domain": true }
+  ]
+}

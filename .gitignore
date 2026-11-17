@@ -1,0 +1,14 @@
+node_modules/
+dist/
+serve.json
+.DS_Store
+*.log
+.env*
+
+# Local tool state
+.wrangler/
+.playwright-mcp/
+
+# Installed agent skills (restore from skills-lock.json)
+.agents/
+.claude/skills/
