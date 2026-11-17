@@ -90,7 +90,7 @@ currently **off** (`"preview_urls": false` in `wrangler.jsonc`). To switch them 
 ## Deploying
 
 Live at **https://coninjacoworking.com**, hosted on Cloudflare Workers (static assets) in the
-Developer@ninjascode.com Cloudflare account. Cloudflare Pages is now part of Workers, so the
+team's Cloudflare account. Cloudflare Pages is now part of Workers, so the
 site deploys with `wrangler deploy`, configured in `wrangler.jsonc`.
 
 Every push to `main` deploys automatically through Cloudflare Workers Builds: the site on any
