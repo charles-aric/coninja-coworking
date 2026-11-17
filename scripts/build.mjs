@@ -3,6 +3,14 @@
 // Produces dist/: responsive images, hashed + minified CSS/JS, minified HTML,
 // sitemap.xml, robots.txt, site.webmanifest and security/caching headers for
 // Cloudflare Pages / Netlify (_headers), Vercel (vercel.json) and Apache (.htaccess).
+//
+// Content pages: every src/pages/<slug>.json is rendered into dist/<slug>.html
+// (see scripts/pages.mjs and content.schema.json) and added to the sitemap.
+//
+// Optional environment:
+//   PREVIEW=1     build for a preview URL: X-Robots-Tag: noindex + disallow-all robots.txt
+//   PAGES_DIR=…   read content pages from another folder (used by `npm run test:pages`)
+//   OUT_DIR=…     write the build somewhere other than dist/
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -11,10 +19,12 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import * as esbuild from 'esbuild';
 import { minify as minifyHtml } from 'html-minifier-terser';
+import { loadPages, validatePage, renderPage } from './pages.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = path.join(ROOT, 'src');
-const OUT = path.join(ROOT, 'dist');
+const OUT = process.env.OUT_DIR ? path.resolve(process.env.OUT_DIR) : path.join(ROOT, 'dist');
+const PAGES_DIR = process.env.PAGES_DIR ? path.resolve(process.env.PAGES_DIR) : path.join(SRC, 'pages');
 const config = JSON.parse(await fs.readFile(path.join(ROOT, 'site.config.json'), 'utf8'));
 
 const SITE_URL = (process.env.SITE_URL || config.url || '').replace(/\/+$/, '');
@@ -23,6 +33,8 @@ if (!/^https?:\/\/[^/]+$/.test(SITE_URL)) {
   process.exit(1);
 }
 const isLocal = /localhost|127\.0\.0\.1/.test(SITE_URL);
+// Preview deployments must never be indexed: noindex header + disallow-all robots.txt
+const isPreview = process.env.PREVIEW === '1';
 // Which host configs to write: cloudflare (also Netlify) | vercel | apache | all
 const TARGET = (process.env.TARGET || 'all').toLowerCase();
 const want = (t) => TARGET === 'all' || TARGET === t;
@@ -74,6 +86,21 @@ async function processImage(file, outDir, urlDir, widths) {
   images[`${urlDir}/${name}.jpg`] = { widths: ws, base: `${urlDir}/${name}`, width: meta.width, height: meta.height };
 }
 const originals = path.join(SRC, 'assets', 'img', 'originals');
+
+// Content pages are validated before the slow image work, so a bad file fails fast
+const contentPages = await loadPages(PAGES_DIR);
+{
+  const ctx = {
+    images: (await fs.readdir(originals)).filter((f) => /\.(jpe?g|png)$/i.test(f)).map((f) => path.basename(f, path.extname(f))).sort(),
+    icons: [...(await fs.readFile(path.join(SRC, 'partials', 'sprite.html'), 'utf8')).matchAll(/id="i-([a-z0-9-]+)"/g)].map((m) => m[1]),
+    reserved: config.pages.map((p) => path.basename(p.file, '.html')),
+  };
+  const problems = contentPages.flatMap(({ file, data }) => validatePage(data, { ...ctx, file }));
+  if (problems.length) {
+    console.error(`\n  Content page errors (${path.relative(ROOT, PAGES_DIR) || PAGES_DIR}):\n${problems.map((p) => `    ${p}`).join('\n')}\n`);
+    process.exit(1);
+  }
+}
 for (const f of await fs.readdir(originals)) {
   if (/\.(jpe?g|png)$/i.test(f)) await processImage(path.join(originals, f), path.join(OUT, 'assets', 'img'), '/assets/img', config.imageWidths);
 }
@@ -141,9 +168,24 @@ function preloadFor(tag) {
   return `<link rel="preload" as="image" type="image/avif" imagesrcset="${srcset(img, 'avif')}" imagesizes="${sizes}" fetchpriority="high">`;
 }
 
+// Hand-written pages from site.config.json, then one page per src/pages/<slug>.json
+const allPages = [
+  ...config.pages,
+  ...contentPages.map(({ data }) => {
+    const img = images[`/assets/img/${data.hero_image}.jpg`];
+    return {
+      file: `${data.slug}.html`,
+      path: `/${data.slug}`,
+      priority: '0.7',
+      changefreq: 'monthly',
+      source: renderPage(data, { width: img.width, height: img.height, largest: img.widths[img.widths.length - 1] }),
+    };
+  }),
+];
+
 const htmlReport = [];
-for (const page of config.pages) {
-  let html = await fs.readFile(path.join(SRC, page.file), 'utf8');
+for (const page of allPages) {
+  let html = page.source ?? await fs.readFile(path.join(SRC, page.file), 'utf8');
 
   html = html.replace(/<!-- include:(\w+) -->/g, (_, name) => {
     if (!(name in partials)) throw new Error(`${page.file}: missing partial "${name}"`);
@@ -183,7 +225,7 @@ for (const page of config.pages) {
 /* ------------------------------------------------------------------ */
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${config.pages.filter((p) => p.path).map((p) => `  <url>
+${allPages.filter((p) => p.path).map((p) => `  <url>
     <loc>${SITE_URL}${p.path}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${p.changefreq}</changefreq>
@@ -193,7 +235,7 @@ ${config.pages.filter((p) => p.path).map((p) => `  <url>
 `;
 await fs.writeFile(path.join(OUT, 'sitemap.xml'), sitemap);
 
-await fs.writeFile(path.join(OUT, 'robots.txt'), isLocal
+await fs.writeFile(path.join(OUT, 'robots.txt'), isLocal || isPreview
   ? 'User-agent: *\nDisallow: /\n'
   : `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 
@@ -241,6 +283,7 @@ const securityHeaders = {
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), browsing-topics=()',
   'Cross-Origin-Opener-Policy': 'same-origin',
+  ...(isPreview ? { 'X-Robots-Tag': 'noindex' } : {}),
 };
 const cacheRules = [
   { path: '/assets/build/*', value: 'public, max-age=31536000, immutable' },
@@ -311,7 +354,7 @@ AddType application/manifest+json .webmanifest
 `);
 
 // Local preview with the same headers (npm run preview); kept out of dist
-await fs.writeFile(path.join(ROOT, 'serve.json'), JSON.stringify({
+if (!process.env.OUT_DIR) await fs.writeFile(path.join(ROOT, 'serve.json'), JSON.stringify({
   cleanUrls: true,
   directoryListing: false,
   headers: [
@@ -323,7 +366,8 @@ await fs.writeFile(path.join(ROOT, 'serve.json'), JSON.stringify({
 
 /* ------------------------------------------------------------------ */
 const imgCount = (await fs.readdir(path.join(OUT, 'assets', 'img'))).length;
-console.log(`Built ${SITE_URL} (host config: ${TARGET}) in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+console.log(`Built ${SITE_URL} (host config: ${TARGET}${isPreview ? ', PREVIEW: noindex' : ''}) in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
 console.log(`  css ${css.url} ${(css.bytes / 1024).toFixed(1)} KB | js ${js.url} ${(js.bytes / 1024).toFixed(1)} KB`);
 console.log(`  images: ${Object.keys(images).length} sources → ${imgCount} files in assets/img`);
 console.log(`  pages: ${htmlReport.join(' | ')}`);
+if (contentPages.length) console.log(`  content pages from JSON: ${contentPages.length}`);

@@ -1,0 +1,197 @@
+{
+  "_about": "Every business fact stated on the site, copied from src/index.html, src/private-office-islamabad.html and src/team-office-space-islamabad.html. Content pages (src/pages/*.json) may only state prices and hours that appear in this file; npm run check enforces it. Change a fact here only after it has changed on the site (or in the same change). Nothing under \"conflicts\" counts as an allowed fact.",
+
+  "business": {
+    "name": "CoNinja Coworking",
+    "short_name": "CoNinja",
+    "slogan": "Work. Connect. Grow.",
+    "summary": "Coworking space and private offices in E-11/3, Islamabad.",
+    "offers": "Coworking seats, team space and executive private offices at Professional Arcade, E-11/3.",
+    "community": "More than just desks. We bring founders, freelancers, creators and professionals together under one roof.",
+    "community_themes": ["Networking", "Learning", "Growing"]
+  },
+
+  "location": {
+    "address": "1st Floor, Professional Arcade, MPCHS E-11/3, Islamabad 44000",
+    "street_address": "1st Floor, Professional Arcade, MPCHS E-11/3",
+    "building": "Professional Arcade",
+    "sector": "E-11/3",
+    "city": "Islamabad",
+    "region": "Islamabad Capital Territory",
+    "postal_code": "44000",
+    "country": "PK",
+    "plus_code": "PX3H+HX Islamabad",
+    "latitude": 33.7038841,
+    "longitude": 72.9799607,
+    "google_maps_name": "CoNinja Coworking",
+    "nearby_sectors": {
+      "next_to": ["F-11"],
+      "close_to": ["F-10", "G-11", "D-12"],
+      "as_stated": "E-11/3 is next to F-11 and close to F-10, G-11 and D-12."
+    }
+  },
+
+  "contact": {
+    "whatsapp_display": "0327 5393390",
+    "whatsapp_international": "+923275393390",
+    "whatsapp_link": "https://wa.me/923275393390",
+    "channel": "WhatsApp only. Bookings are handled on WhatsApp only; there is no phone line.",
+    "instagram": "@coninja.official",
+    "instagram_url": "https://www.instagram.com/coninja.official/"
+  },
+
+  "hours": {
+    "monday_to_friday": "Open 24 hours",
+    "saturday": "12 PM to 12:30 AM",
+    "sunday": "12 PM to midnight",
+    "summary": "Open 24 hours from Monday to Friday, 12 PM to 12:30 AM on Saturday and 12 PM to midnight on Sunday.",
+    "timezone": "Islamabad time",
+    "holidays": "Hours can change on public holidays. Message us before you come.",
+    "night_work": "We don't close between Monday and Friday, so you can work US or UK hours from a proper desk.",
+    "night_example": "Come in at 9 PM and leave at 6 AM, Monday to Friday.",
+    "structured_data": {
+      "monday_to_friday": { "opens": "00:00", "closes": "23:59" },
+      "saturday": { "opens": "12:00", "closes": "00:30" },
+      "sunday": { "opens": "12:00", "closes": "23:59" }
+    }
+  },
+
+  "plans": [
+    {
+      "name": "Coworking seat",
+      "price": "PKR 14,000",
+      "price_pkr": 14000,
+      "unit": "per seat, per month",
+      "for": "For freelancers and remote workers who want a proper desk away from home.",
+      "includes": [
+        "High speed fiber internet",
+        "24/7 UPS power backup",
+        "Unlimited tea and coffee",
+        "Kitchen and washroom access",
+        "Open 24 hours on weekdays"
+      ],
+      "bills": "Not stated. For a seat or a private office, ask us on WhatsApp and we'll confirm what's covered."
+    },
+    {
+      "name": "Team space",
+      "price": "PKR 14,000",
+      "price_pkr": 14000,
+      "unit": "per seat, per month, all bills included",
+      "for": "For teams of 20 people or more, with room for 35 to 40+.",
+      "minimum_team": "20 people or more",
+      "capacity": "35 to 40+",
+      "example": "At PKR 14,000 a seat, a team of 20 pays PKR 280,000 a month at CoNinja, with all bills included.",
+      "quote_note": "This is an estimate; we confirm your quote on WhatsApp.",
+      "includes": [
+        "Private space for your team",
+        "Meeting and conference room access",
+        "24/7 CCTV security",
+        "Free parking",
+        "All bills included",
+        "High speed internet",
+        "24/7 power backup",
+        "Fully air conditioned",
+        "Unlimited tea and coffee",
+        "Kitchen and washroom access"
+      ],
+      "bills": "All bills included.",
+      "page": "/team-office-space-islamabad"
+    },
+    {
+      "name": "Executive private office",
+      "price": "From PKR 55,000",
+      "price_pkr_from": 55000,
+      "unit": "per month",
+      "for": "Privacy, comfort and a door that closes. A furnished, serviced executive office.",
+      "includes": [
+        "Fully furnished executive office (desk, executive chair and storage in place on day one)",
+        "Dedicated AC",
+        "High speed internet",
+        "Meeting room access",
+        "Tea and coffee included",
+        "Office boy service",
+        "24/7 UPS power backup",
+        "24/7 CCTV",
+        "Free parking"
+      ],
+      "bills": "Not stated. For a seat or a private office, ask us on WhatsApp and we'll confirm what's covered.",
+      "page": "/private-office-islamabad"
+    },
+    {
+      "name": "Day pass",
+      "price": "PKR 1,000",
+      "price_pkr": 1000,
+      "unit": "per day",
+      "includes": ["A coworking seat for the day."]
+    },
+    {
+      "name": "Meeting room",
+      "price": "PKR 3,000",
+      "price_pkr": 3000,
+      "unit": "per hour",
+      "includes": ["Book the meeting room by the hour for client meetings, interviews and team reviews."]
+    },
+    {
+      "name": "Virtual office",
+      "price": "Not published. Ask for the price on WhatsApp.",
+      "includes": ["A virtual office in Islamabad at Professional Arcade, E-11/3. Message us for the price and what is included."]
+    },
+    {
+      "name": "Studio Office",
+      "price": "Not published. Ask us on WhatsApp.",
+      "includes": []
+    }
+  ],
+
+  "price_range": "PKR 1,000 a day to PKR 55,000+ a month",
+  "all_plans_include": "Every plan in our shared office space comes with internet, air conditioning and tea and coffee.",
+
+  "free_trial": "A free trial of 1 to 3 hours. After that, a day pass is PKR 1,000 per day.",
+  "free_tour": "Tours are free and there's nothing to sign. Book a free tour on WhatsApp at 0327 5393390 or with the tour form on the home page, and visit during opening hours.",
+
+  "facilities": [
+    "High speed fiber internet",
+    "24/7 UPS power backup",
+    "Fully air conditioned",
+    "Unlimited tea and coffee",
+    "Meeting and conference room",
+    "Kitchen and washrooms",
+    "24/7 CCTV security",
+    "Free parking",
+    "Open all night on weekdays",
+    "Lounge and table tennis (sofas, a TV and a table)"
+  ],
+
+  "reviews": {
+    "google_rating": "4.9",
+    "google_review_count": "20",
+    "as_stated": "Rated 4.9 on Google from 20 reviews"
+  },
+
+  "joining": [
+    "Message us or book a tour",
+    "Walk around the floor",
+    "Pick your space and start"
+  ],
+
+  "conflicts": [
+    {
+      "topic": "Are bills included with a private office?",
+      "kind": "possible conflict (wording, not numbers)",
+      "statements": [
+        { "page": "src/index.html (FAQ: Are bills included?)", "text": "Team space at PKR 14,000 a seat includes all bills. For a seat or a private office, ask us on WhatsApp and we'll confirm what's covered." },
+        { "page": "src/private-office-islamabad.html (section heading)", "text": "Everything in the rent, from the desk to the chai" }
+      ],
+      "rule_for_new_pages": "Do not say bills are included for a coworking seat or a private office. Only team space states that all bills are included."
+    },
+    {
+      "topic": "Sunday closing time",
+      "kind": "representation only",
+      "statements": [
+        { "page": "src/index.html (hours list and FAQ), src/private-office-islamabad.html (FAQ)", "text": "Sunday 12 PM to midnight" },
+        { "page": "src/index.html (LocalBusiness JSON-LD openingHoursSpecification)", "text": "Sunday opens 12:00, closes 23:59" }
+      ],
+      "rule_for_new_pages": "Write Sunday hours as 12 PM to midnight."
+    }
+  ]
+}

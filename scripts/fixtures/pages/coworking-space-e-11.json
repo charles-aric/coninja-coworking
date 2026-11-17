@@ -1,0 +1,54 @@
+{
+  "slug": "coworking-space-e-11",
+  "title": "Coworking Space in E-11 Islamabad | Seats and Day Passes",
+  "description": "Test fixture: a coworking seat in E-11/3 Islamabad for PKR 14,000 a month or PKR 1,000 a day, open 24 hours Monday to Friday. Tours are free.",
+  "h1": "Coworking space in E-11, Islamabad",
+  "lead": "A desk at Professional Arcade, E-11/3, with fiber internet & 24/7 UPS power backup. <b>Markup in text is escaped</b>, \"quotes\" too.",
+  "breadcrumb": "Coworking in E-11",
+  "hero_image": "coworking-desks",
+  "service_name": "Coworking space in E-11, Islamabad",
+  "service_type": "Coworking space rental",
+  "sections": [
+    {
+      "type": "features",
+      "heading": "What comes with a seat",
+      "items": [
+        { "title": "High speed fiber internet", "text": "Steady enough for client calls, uploads and deploys." },
+        { "title": "24/7 UPS power backup", "text": "Load shedding doesn't end your workday.", "icon": "lightning" },
+        { "title": "Unlimited tea and coffee", "text": "Part of your seat, so nobody counts cups." }
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "Opening hours",
+      "paragraphs": [
+        "The floor is open 24 hours from Monday to Friday, 12 PM to 12:30 AM on Saturday and 12 PM to midnight on Sunday.",
+        "Try it first with a free trial of 1 to 3 hours. After that, a day pass is PKR 1,000 per day."
+      ]
+    },
+    {
+      "type": "comparison",
+      "heading": "A coworking seat versus working from home",
+      "columns": ["CoNinja coworking seat", "Working from home"],
+      "rows": [
+        ["Power backup", "24/7 UPS", "Your own UPS"],
+        ["Internet", "Fiber on the floor", "Your home connection"],
+        ["Price", "PKR 14,000 per seat, per month", "Bills & your own setup"]
+      ]
+    },
+    {
+      "type": "faq",
+      "heading": "Coworking questions",
+      "items": [
+        { "q": "How much is a coworking seat in E-11?", "a": "A coworking seat is PKR 14,000 a month." },
+        { "q": "Is there a day pass?", "a": "Yes. A day pass is PKR 1,000 per day." },
+        { "q": "Can I see the space first?", "a": "Yes. Book a free tour on WhatsApp at 0327 5393390." }
+      ]
+    },
+    {
+      "type": "cta",
+      "heading": "See the coworking floor in person",
+      "text": "Tours are free and there's nothing to sign."
+    }
+  ]
+}
