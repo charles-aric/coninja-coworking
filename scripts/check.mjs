@@ -1,14 +1,19 @@
 // Pre-deploy checks on dist/: run `npm run build` first, then `npm run check`.
 // Fails (exit 1) on broken internal links or anchors, missing alt text, missing
 // SEO tags, invalid JSON-LD, stray tel: links, unresolved build tokens or
-// sitemap URLs that don't map to a file.
+// sitemap URLs that don't map to a file. For content pages (src/pages/*.json) it
+// also fails when a page is missing from dist/ or the sitemap, or states a price
+// or opening hours that site.facts.json does not contain.
+// OUT_DIR and PAGES_DIR override dist/ and src/pages/ (used by `npm run test:pages`).
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadPages, allowedFacts, factProblems } from './pages.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DIST = path.join(ROOT, 'dist');
+const DIST = process.env.OUT_DIR ? path.resolve(process.env.OUT_DIR) : path.join(ROOT, 'dist');
+const PAGES_DIR = process.env.PAGES_DIR ? path.resolve(process.env.PAGES_DIR) : path.join(ROOT, 'src', 'pages');
 const config = JSON.parse(await fs.readFile(path.join(ROOT, 'site.config.json'), 'utf8'));
 const errors = [];
 const warn = [];
@@ -16,6 +21,14 @@ const exists = (p) => fs.access(p).then(() => true, () => false);
 
 const pages = {};
 for (const p of config.pages) pages[p.file] = await fs.readFile(path.join(DIST, p.file), 'utf8');
+
+// Content pages written by the automation
+const contentPages = await loadPages(PAGES_DIR);
+for (const { file, data } of contentPages) {
+  const out = `${data.slug}.html`;
+  if (await exists(path.join(DIST, out))) pages[out] = await fs.readFile(path.join(DIST, out), 'utf8');
+  else errors.push(`${file}: ${out} is missing from the build (run npm run build)`);
+}
 
 const idsIn = (html) => new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]));
 const fileForPath = (p) => {
@@ -99,8 +112,18 @@ for (const m of sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)) {
   const u = new URL(m[1]);
   if (!pages[fileForPath(u.pathname)]) errors.push(`sitemap.xml: ${m[1]} has no page`);
 }
+for (const { file, data } of contentPages) {
+  if (!sitemap.includes(`/${data.slug}</loc>`)) errors.push(`${file}: /${data.slug} is not in sitemap.xml`);
+}
+
+// Facts: prices and hours on content pages must come from site.facts.json
+if (contentPages.length) {
+  const allowed = allowedFacts(JSON.parse(await fs.readFile(path.join(ROOT, 'site.facts.json'), 'utf8')));
+  for (const { file, data } of contentPages) errors.push(...factProblems(data, allowed, file));
+}
+
 const robots = await fs.readFile(path.join(DIST, 'robots.txt'), 'utf8');
-if (/Disallow: \/\s*$/m.test(robots)) warn.push('robots.txt blocks all crawlers (expected only for localhost builds)');
+if (/Disallow: \/\s*$/m.test(robots)) warn.push('robots.txt blocks all crawlers (expected only for localhost and PREVIEW=1 builds)');
 for (const f of ['site.webmanifest', '404.html', 'sitemap.xml', 'robots.txt']) {
   if (!(await exists(path.join(DIST, f)))) errors.push(`missing ${f}`);
 }

@@ -8,6 +8,7 @@
     "build": "node scripts/build.mjs",
     "preview": "SITE_URL=http://localhost:4322 node scripts/build.mjs && serve dist --listen 4322 --config ../serve.json",
     "check": "node scripts/check.mjs",
+    "test:pages": "node scripts/test-pages.mjs",
     "build:cloudflare": "TARGET=cloudflare node scripts/build.mjs",
     "deploy": "npm run build:cloudflare && npm run check && wrangler deploy && wrangler deploy -c workers/www-redirect/wrangler.jsonc"
   },

@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coninjacoworking.com/content.schema.json",
+  "title": "CoNinja content page",
+  "description": "One landing page, saved as src/pages/<slug>.json. The build renders it to dist/<slug>.html. All text is plain text (no HTML or Markdown); the build escapes it. Prices and hours must match site.facts.json. scripts/pages.mjs is the validator the build runs; keep the two in step.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["slug", "title", "description", "h1", "lead", "breadcrumb", "hero_image", "service_name", "service_type", "sections"],
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "description": "URL path and file name: /<slug> and src/pages/<slug>.json. Must not be an existing page (index, private-office-islamabad, team-office-space-islamabad, privacy, terms, 404)."
+    },
+    "title": { "type": "string", "minLength": 1, "maxLength": 60, "description": "<title>, og:title and twitter:title." },
+    "description": { "type": "string", "minLength": 1, "maxLength": 155, "description": "Meta description, og:description and twitter:description." },
+    "h1": { "type": "string", "minLength": 1, "description": "The page's only <h1>." },
+    "lead": { "type": "string", "minLength": 1, "description": "Paragraph under the h1." },
+    "breadcrumb": { "type": "string", "minLength": 1, "description": "Short label for the breadcrumb (visible and in BreadcrumbList JSON-LD)." },
+    "hero_image": {
+      "type": "string",
+      "minLength": 1,
+      "description": "File name without extension of a photo in src/assets/img/originals. The build fails on a name that is not there.",
+      "examples": ["coworking-desks", "team-office", "executive-cabin", "private-cabin", "corridor", "lounge", "reception", "meeting-corner", "table-tennis"]
+    },
+    "hero_alt": { "type": "string", "minLength": 1, "description": "Optional. Alt text for the hero photo. Defaults to the description of that photo already used on the site." },
+    "service_name": { "type": "string", "minLength": 1, "description": "Service JSON-LD name." },
+    "service_type": { "type": "string", "minLength": 1, "description": "Service JSON-LD serviceType." },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Rendered in order under the hero. FAQ items from every faq section also go into FAQPage JSON-LD.",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/features" },
+          { "$ref": "#/$defs/text" },
+          { "$ref": "#/$defs/comparison" },
+          { "$ref": "#/$defs/faq" },
+          { "$ref": "#/$defs/cta" }
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "text_value": { "type": "string", "minLength": 1 },
+    "label": { "type": "string", "minLength": 1, "description": "Optional. Small eyebrow line above the heading. comparison defaults to \"Compare\" and faq to \"FAQ\"." },
+    "features": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "heading", "items"],
+      "properties": {
+        "type": { "const": "features" },
+        "heading": { "$ref": "#/$defs/text_value" },
+        "label": { "$ref": "#/$defs/label" },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["title", "text"],
+            "properties": {
+              "title": { "$ref": "#/$defs/text_value" },
+              "text": { "$ref": "#/$defs/text_value" },
+              "icon": {
+                "description": "Optional. Icon from src/partials/sprite.html without the i- prefix. Defaults to check.",
+                "enum": ["wifi-high", "snowflake", "moon-stars", "door", "chats-circle", "couch", "ping-pong", "bell-simple", "whatsapp-logo", "whatsapp-logo-fill", "map-pin", "arrow-right", "arrow-up-right", "x", "calendar-check", "navigation-arrow", "star-fill", "lightning", "coffee", "car", "security-camera", "fork-knife", "check", "instagram-logo", "presentation", "buildings", "users-three", "sparkle", "clock"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "text": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "heading", "paragraphs"],
+      "properties": {
+        "type": { "const": "text" },
+        "heading": { "$ref": "#/$defs/text_value" },
+        "label": { "$ref": "#/$defs/label" },
+        "paragraphs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text_value" } }
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "heading", "columns", "rows"],
+      "properties": {
+        "type": { "const": "comparison" },
+        "heading": { "$ref": "#/$defs/text_value" },
+        "label": { "$ref": "#/$defs/label" },
+        "columns": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "$ref": "#/$defs/text_value" },
+          "description": "The two column headings. The first column is CoNinja's (shown with a tick), the second is the alternative."
+        },
+        "rows": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": { "$ref": "#/$defs/text_value" },
+            "description": "[row label, first column value, second column value]"
+          }
+        }
+      }
+    },
+    "faq": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "heading", "items"],
+      "properties": {
+        "type": { "const": "faq" },
+        "heading": { "$ref": "#/$defs/text_value" },
+        "label": { "$ref": "#/$defs/label" },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["q", "a"],
+            "properties": {
+              "q": { "$ref": "#/$defs/text_value" },
+              "a": { "$ref": "#/$defs/text_value" }
+            }
+          }
+        }
+      }
+    },
+    "cta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "heading", "text"],
+      "properties": {
+        "type": { "const": "cta" },
+        "heading": { "$ref": "#/$defs/text_value" },
+        "text": { "$ref": "#/$defs/text_value" }
+      }
+    }
+  }
+}
