@@ -36,6 +36,9 @@ Live at **https://coninjacoworking.com**, hosted on Cloudflare Workers (static a
 Developer@ninjascode.com Cloudflare account. Cloudflare Pages is now part of Workers, so the
 site deploys with `wrangler deploy`, configured in `wrangler.jsonc`.
 
+Every push to `main` deploys automatically through Cloudflare Workers Builds: the site on any
+change, the www redirect only when `workers/www-redirect/` changes. To deploy by hand instead:
+
 ```bash
 npx wrangler login     # once per machine, approve in the browser
 npm run deploy         # build for Cloudflare, run checks, upload, then redeploy the www redirect
