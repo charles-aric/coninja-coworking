@@ -1,4 +1,4 @@
-# CoNinja Coworking website
+# CoNinja Coworking Website
 
 Static site for CoNinja Coworking, 1st Floor, Professional Arcade, MPCHS E-11/3, Islamabad.
 Plain HTML, CSS and JavaScript with a small Node build. No framework, no ad trackers, no backend (Google Analytics 4 is the only thing that sets cookies):
