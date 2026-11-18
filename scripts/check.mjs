@@ -1,19 +1,23 @@
 // Pre-deploy checks on dist/: run `npm run build` first, then `npm run check`.
 // Fails (exit 1) on broken internal links or anchors, missing alt text, missing
 // SEO tags, invalid JSON-LD, stray tel: links, unresolved build tokens or
-// sitemap URLs that don't map to a file. For content pages (src/pages/*.json) it
-// also fails when a page is missing from dist/ or the sitemap, or states a price
-// or opening hours that site.facts.json does not contain.
-// OUT_DIR and PAGES_DIR override dist/ and src/pages/ (used by `npm run test:pages`).
+// sitemap URLs that don't map to a file. For content pages (src/pages/*.json) and
+// hub pages (/blog/, /compare/, /areas/) it also fails when a page is missing from
+// dist/ or the sitemap. The facts check fails on any price or opening hours in
+// src/pages/*.json or src/content/*.json that site.facts.json does not contain,
+// and on any price or hour at all in the hub wording.
+// OUT_DIR, PAGES_DIR and CONTENT_DIR override dist/, src/pages/ and src/content/
+// (used by `npm run test:pages`).
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadPages, allowedFacts, factProblems } from './pages.mjs';
+import { loadPages, allowedFacts, factProblems, extractFacts, hubsFor, HUBS } from './pages.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = process.env.OUT_DIR ? path.resolve(process.env.OUT_DIR) : path.join(ROOT, 'dist');
 const PAGES_DIR = process.env.PAGES_DIR ? path.resolve(process.env.PAGES_DIR) : path.join(ROOT, 'src', 'pages');
+const CONTENT_DIR = process.env.CONTENT_DIR ? path.resolve(process.env.CONTENT_DIR) : path.join(ROOT, 'src', 'content');
 const config = JSON.parse(await fs.readFile(path.join(ROOT, 'site.config.json'), 'utf8'));
 const errors = [];
 const warn = [];
@@ -30,10 +34,21 @@ for (const { file, data } of contentPages) {
   else errors.push(`${file}: ${out} is missing from the build (run npm run build)`);
 }
 
+// Hub pages: one per section that has at least one JSON page
+const hubs = hubsFor(contentPages.map(({ data }) => data));
+for (const hub of hubs) {
+  if (await exists(path.join(DIST, hub.file))) pages[hub.file] = await fs.readFile(path.join(DIST, hub.file), 'utf8');
+  else errors.push(`${hub.path}: ${hub.file} is missing from the build (run npm run build)`);
+}
+for (const hub of Object.values(HUBS)) {
+  if (!hubs.some((h) => h.slug === hub.slug) && await exists(path.join(DIST, hub.slug, 'index.html'))) errors.push(`/${hub.slug}/ is built but has no pages`);
+}
+
 const idsIn = (html) => new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]));
 const fileForPath = (p) => {
   if (p === '/' || p === '') return 'index.html';
-  const clean = p.replace(/^\//, '').replace(/\/$/, '');
+  if (p.endsWith('/')) return `${p.replace(/^\//, '')}index.html`;
+  const clean = p.replace(/^\//, '');
   return clean.endsWith('.html') ? clean : `${clean}.html`;
 };
 
@@ -115,11 +130,19 @@ for (const m of sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)) {
 for (const { file, data } of contentPages) {
   if (!sitemap.includes(`/${data.slug}</loc>`)) errors.push(`${file}: /${data.slug} is not in sitemap.xml`);
 }
+for (const hub of hubs) {
+  if (!sitemap.includes(`${hub.path}</loc>`)) errors.push(`${hub.path} is not in sitemap.xml`);
+}
 
-// Facts: prices and hours on content pages must come from site.facts.json
-if (contentPages.length) {
-  const allowed = allowedFacts(JSON.parse(await fs.readFile(path.join(ROOT, 'site.facts.json'), 'utf8')));
-  for (const { file, data } of contentPages) errors.push(...factProblems(data, allowed, file));
+// Facts: prices and hours on JSON pages and in the hand-written pages' copy must come from site.facts.json
+const allowed = allowedFacts(JSON.parse(await fs.readFile(path.join(ROOT, 'site.facts.json'), 'utf8')));
+for (const { file, data } of contentPages) errors.push(...factProblems(data, allowed, file));
+const contentFiles = await loadPages(CONTENT_DIR);
+for (const { file, data } of contentFiles) errors.push(...factProblems(data, allowed, `src/content/${file}`));
+// Hub wording states no price or hour at all
+for (const hub of Object.values(HUBS)) {
+  const found = extractFacts(Object.values(hub).join('\n'));
+  for (const map of Object.values(found)) for (const raw of map.values()) errors.push(`hub /${hub.slug}/: "${raw}" is a price or hour; hub wording must not state one`);
 }
 
 const robots = await fs.readFile(path.join(DIST, 'robots.txt'), 'utf8');

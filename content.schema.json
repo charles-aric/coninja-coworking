@@ -10,7 +10,12 @@
     "slug": {
       "type": "string",
       "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-      "description": "URL path and file name: /<slug> and src/pages/<slug>.json. Must not be an existing page (index, private-office-islamabad, team-office-space-islamabad, privacy, terms, 404)."
+      "description": "URL path and file name: /<slug> and src/pages/<slug>.json. Must not be an existing page (index, private-office-islamabad, team-office-space-islamabad, privacy, terms, 404) or a hub (blog, compare, areas)."
+    },
+    "section": {
+      "enum": ["service", "compare", "blog", "area"],
+      "default": "service",
+      "description": "Optional. Which part of the site the page belongs to. service (the default): a money page, linked from every Related pages block. compare: listed on /compare/. blog: listed on /blog/. area: listed on /areas/. A hub page and its footer link exist only while at least one page has that section. Every page also gets an automatic Related pages block before its final cta section."
     },
     "title": { "type": "string", "minLength": 1, "maxLength": 60, "description": "<title>, og:title and twitter:title." },
     "description": { "type": "string", "minLength": 1, "maxLength": 155, "description": "Meta description, og:description and twitter:description." },

@@ -11,7 +11,7 @@ npm install                                  # once
 npm run preview                              # build for localhost and serve at http://localhost:4322
 npm run build                                # production build into dist/ (domain from site.config.json)
 npm run check                                # pre-deploy checks on dist/
-npm run test:pages                           # build the fixture content page in a temp dir and check it
+npm run test:pages                           # build the fixture content pages in a temp dir and check them
 ```
 
 The domain lives in `site.config.json` (`"url": "https://coninjacoworking.com"`); `SITE_URL` in the
@@ -20,6 +20,9 @@ environment overrides it. Canonical URLs, the sitemap and social previews all us
 ## What the build does
 
 - Includes the shared partials in `src/partials/` (head, nav, footer, icon sprite, lightbox).
+- Fills the copy of the hand-written pages from `src/content/<page>.json` (see Editable copy below).
+- Renders `src/pages/<slug>.json` pages, the hub pages `/blog/`, `/compare/` and `/areas/`, and the
+  footer links to those hubs.
 - Turns every `<img src="/assets/img/NAME.jpg" data-sizes="…">` into a `<picture>` with AVIF,
   WebP and JPEG at 320–1200px, from the full size photos in `src/assets/img/originals/`.
 - Minifies and fingerprints CSS and JS (`/assets/build/*.HASH.css|js`), minifies HTML.
@@ -37,7 +40,8 @@ An automation adds SEO landing pages as data, not HTML. Each page is one file,
 `src/pages/<slug>.json`, in the shape defined by `content.schema.json`:
 
 ```json
-{ "slug": "coworking-space-e-11", "title": "60 chars or fewer", "description": "155 chars or fewer",
+{ "slug": "coworking-space-e-11", "section": "service",
+  "title": "60 chars or fewer", "description": "155 chars or fewer",
   "h1": "", "lead": "", "breadcrumb": "short label", "hero_image": "coworking-desks",
   "service_name": "", "service_type": "",
   "sections": [
@@ -56,10 +60,11 @@ An automation adds SEO landing pages as data, not HTML. Each page is one file,
   is `scripts/pages.mjs`.
 - **Rules.** The file name must be the slug. All text is plain text and is escaped. `hero_image`
   is the name, without extension, of a photo in `src/assets/img/originals/`. Optional keys:
-  `hero_alt` (page), `label` (features, text, comparison and faq sections) and `icon` (feature
-  items; an icon id from `src/partials/sprite.html` without the `i-`). The build stops with a
-  message naming the file and key on an unknown section type, a missing or unknown key, an unknown
-  image, or a title or description that is too long.
+  `section` (page, see below), `hero_alt` (page), `label` (features, text, comparison and faq
+  sections) and `icon` (feature items; an icon id from `src/partials/sprite.html` without the `i-`).
+  The build stops with a message naming the file and key on an unknown section type or page
+  section, a missing or unknown key, an unknown image, a slug used by a page or hub, or a title or
+  description that is too long.
 - **Facts file.** `site.facts.json` holds every business fact stated on the site. A content page
   may only state a price (PKR, Rs or rupee amounts) or opening hours (clock times, time ranges,
   "24 hours", "1 to 3 hours", "24/7") that appear in that file. `npm run check` fails otherwise and
@@ -71,8 +76,74 @@ An automation adds SEO landing pages as data, not HTML. Each page is one file,
   `scripts/fixtures/invalid/` is rejected. `.github/workflows/check.yml` runs `npm ci`,
   `npm run build` and `npm run check` on every pull request and on pushes to `main`.
 
-New pages are not linked from the nav or footer automatically; they are reachable through the
-sitemap until a link is added by hand.
+### Sections, hubs and related links
+
+Every JSON page belongs to one section, set by the optional top-level `"section"` key:
+
+| `section` | What it is | Listed on |
+|---|---|---|
+| `service` (default when missing) | a money page | the Related pages block of every page |
+| `compare` | a comparison with another workspace | `/compare/` |
+| `blog` | a guide | `/blog/` |
+| `area` | a page for a nearby sector | `/areas/` |
+
+- **Hubs.** For `compare`, `blog` and `area`, the build writes a hub page (`dist/compare/index.html`
+  and so on, served at `/compare/`) as soon as one page has that section, and none while it has no
+  pages. A hub lists its pages in slug order with title, description and link, uses the landing page
+  layout and card styles, has its own title, description, canonical, breadcrumb and
+  `CollectionPage` JSON-LD, and is added to the sitemap. Hub wording lives in `HUBS` in
+  `scripts/pages.mjs`; `npm run check` fails if it states any price or hour.
+- **Footer.** The footer partial has a `%HUB_LINKS%` token after "Team office space". The build
+  replaces it with a link to each hub that exists ("Guides", "Compare", "Areas"), or nothing.
+- **Related pages.** Every JSON page gets a "Related pages" block before its final `cta` section
+  (at the end when there is none): up to 4 links. First come the next pages of the same section in
+  slug order, wrapping round so links spread across the section; then the money pages: home,
+  private office, team space, then JSON pages with section `service`. A page never links to itself,
+  and `blog`, `compare` and `area` pages always keep at least one money page link (they take at most
+  3 pages from their own section). The order depends only on the slugs, so it is the same on every
+  build. The money pages' card text is their `title` (cut at " | ") and `description` slots from
+  `src/content/`.
+
+## Editable copy on the hand-written pages
+
+`src/index.html`, `src/private-office-islamabad.html` and `src/team-office-space-islamabad.html` keep
+their own design, but their copy lives in `src/content/<page>.json` (`index.json` for the home page).
+The HTML marks each piece of copy with `data-slot="<key>"`; the JSON is one flat object of
+`"<key>": "<text>"`:
+
+```json
+{
+  "title": "Coworking Space in E-11 Islamabad | CoNinja Coworking",
+  "h1_line_1": "A desk that keeps",
+  "lead": "Coworking seats, team space and executive private offices at Professional Arcade, E-11/3. …",
+  "faq_2_q": "Is there a day pass for the coworking space?",
+  "faq_2_a": "Yes. A day pass is PKR 1,000 per day.",
+  "faq_12_a__html": "Yes. <a href=\"/team-office-space-islamabad\">Team space</a> fits 35 to 40+ people …"
+}
+```
+
+- **Filling.** The build puts each value into its element and drops the `data-slot` attribute, so
+  the output is the same HTML as before. A `<meta data-slot>` gets the value as its `content`. An
+  element that also holds fixed markup (an icon, a badge) marks where the text goes with `%SLOT%`,
+  for example `<td data-slot="compare_row_1_col_1"><svg …></svg>%SLOT%</td>`.
+- **Plain text.** Values are plain text and are escaped. A key ending in `__html` may hold only
+  `<b>…</b>`, `<br>`, `<a href="/internal-path">` (optionally `class="violet"`) and the CoNinja
+  WhatsApp link `<a href="https://wa.me/923275393390…" target="_blank" rel="noopener">`. The key in
+  the HTML and in the JSON must match, `__html` included.
+- **FAQ.** FAQ items are `faq_<n>_q` and `faq_<n>_a` (or `faq_<n>_a__html`). The `FAQPage` JSON-LD of
+  these pages is generated from the same slots (at the `%FAQ_JSONLD%` token, markup removed), so
+  the visible FAQ and the structured data cannot drift apart. Add or remove a question by adding or
+  removing the `<div class="faq__item">` in the HTML and its two keys in the JSON.
+- **Checks.** The build fails on a slot without a value, an empty value, a key without a slot, a
+  slot used twice, markup in a plain value, markup outside the rule above, or a `title` over 65 or a
+  `description` over 160 characters. `npm run check` runs the facts check on every
+  `src/content/*.json`, as for JSON pages.
+- **Rewriting a page** (for example from the automation): replace `src/content/<page>.json` with new
+  values for the same keys, then run `npm run build`, `npm run check` and `npm run test:pages`.
+  Changing which keys exist needs a matching change in the HTML.
+- Not slotted on purpose: Google review quotes and names, the tour form, image alt text, breadcrumb
+  labels (they are also in the BreadcrumbList JSON-LD), links that show the WhatsApp number, and the
+  team-size slider label on the team page (its number is filled in by `main.js`).
 
 ### Preview builds
 
@@ -129,9 +200,9 @@ writes `.htaccess` for cPanel; `TARGET=netlify` writes `_headers` and `_redirect
 
 | What | Where |
 |---|---|
-| Prices, facilities, FAQ, hours | `src/index.html` (FAQ answers are also in the JSON-LD at the top of the page) |
-| Private office page | `src/private-office-islamabad.html` |
-| Team space page | `src/team-office-space-islamabad.html` |
+| Wording of the home, private office and team pages (prices, facilities, FAQ, hours) | `src/content/index.json`, `src/content/private-office-islamabad.json`, `src/content/team-office-space-islamabad.json` |
+| Layout of those pages | `src/index.html`, `src/private-office-islamabad.html`, `src/team-office-space-islamabad.html` |
+| Hub page wording | `HUBS` in `scripts/pages.mjs` |
 | Nav and footer links | `src/partials/nav.html`, `src/partials/footer.html` |
 | Opening hours logic (open now badge) | `src/js/main.js` → `statusFor` |
 | Colours, type, spacing | tokens at the top of `src/css/styles.css` |
@@ -140,5 +211,6 @@ writes `.htaccess` for cPanel; `TARGET=netlify` writes `_headers` and `_redirect
 | New landing page from the automation | `src/pages/<slug>.json` (see Automated pages) |
 | Business facts allowed on automated pages | `site.facts.json` |
 
-When you change a fact, change it everywhere it appears: the visible text, the FAQ JSON-LD,
-`site.facts.json` and, if it is a price, the `makesOffer` block.
+When you change a fact, change it everywhere it appears: the visible text (`src/content/`),
+`site.facts.json` and, if it is a price, the `makesOffer` and `offers` JSON-LD blocks in the HTML.
+The FAQ JSON-LD follows the FAQ slots on its own.
