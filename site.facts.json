@@ -226,6 +226,75 @@
         "https://www.daftarkhwan.com/locations/rawalpindi",
         "https://www.daftarkhwan.com/faqs"
       ]
+    },
+    "the_hive": {
+      "name": "The Hive",
+      "website": "https://thehive.pk",
+      "checked": "18 November 2026",
+      "describes_itself_as": "Pakistan's pioneering coworking space, empowering businesses, entrepreneurs, and innovators since 2016.",
+      "cities": ["Karachi", "Lahore", "Islamabad"],
+      "locations": {
+        "islamabad": [
+          { "name": "The Hive Blue Area", "area": "Blue Area, G-6/2" },
+          { "name": "The Hive ISE Tower", "area": "Islamabad Stock Exchange Tower, Jinnah Avenue" },
+          { "name": "The Hive Tower", "area": "G-9/4, Mauve Area" }
+        ],
+        "islamabad_coming_soon": ["The Hive at PureOne", "The Hive at Crown Mall"]
+      },
+      "services_listed": ["Private Offices", "Shared Desks", "Day Pass", "Meeting Rooms", "Event Spaces", "Virtual Offices"],
+      "as_stated": "Coworking is flexible and month-to-month, with day passes available at all three Islamabad locations.",
+      "prices": "Not published",
+      "hours": "Not published",
+      "free_trial": "Not published",
+      "tours": "They offer a free tour that you schedule with them.",
+      "sources": ["https://thehive.pk/", "https://thehive.pk/islamabad"]
+    },
+    "kickstart": {
+      "name": "Kickstart",
+      "website": "https://kickstart.pk",
+      "checked": "18 November 2026",
+      "describes_itself_as": "Pakistan's first flexible coworking space",
+      "cities": ["Lahore", "Karachi", "Islamabad"],
+      "locations": {
+        "islamabad": [
+          { "name": "Kickstart Campus", "area": "I-10" },
+          { "name": "Kickstart Cluster", "area": "I-10/3, Chinar Road" },
+          { "name": "Kickstart 9th Avenue", "area": "Not published" }
+        ]
+      },
+      "services_listed": ["Serviced Office", "Dedicated Desk", "Hot Desk", "Meeting Room", "Event Space", "Bespoke/Custom Office"],
+      "amenities_listed": ["High-speed internet", "Meeting rooms", "Printing services", "Backup power", "Ergonomic furniture", "24/7 security, access control and CCTV"],
+      "prices": {
+        "as_stated": "Hot desks typically start from PKR 10,000/month, with private offices available at higher rates.",
+        "where": "Their Islamabad page FAQ. No price is published for a specific location.",
+        "private_office": "Not published"
+      },
+      "hours": "Not published",
+      "free_trial": "Not published",
+      "tours": "They offer tours that you schedule with them.",
+      "sources": ["https://kickstart.pk/", "https://kickstart.pk/coworking-spaces-islamabad/"]
+    },
+    "regus": {
+      "name": "Regus",
+      "website": "https://www.regus.com/en/pk/islamabad",
+      "checked": "18 November 2026",
+      "describes_itself_as": "Flexible Workspaces in Islamabad",
+      "price_terms": "Regus shows \"from\" prices per person per day (meeting rooms per room per hour), the lowest current prices, with a minimum term, billed monthly. Their page says the pricing is correct as of November 2026. Always state a Regus price with these terms.",
+      "locations_listed_under_islamabad": [
+        { "name": "Regus G-9 Markaz", "area": "G-9 Markaz", "prices_from": { "office_space": "PKR1,000/ day", "coworking_desk": "PKR1,000/ day", "virtual_office": "PKR264/ day", "meeting_room": "At checkout" } },
+        { "name": "Regus Emirates Tower", "area": "2nd and 3rd Floor, Emirates Tower, F-7 Markaz", "prices_from": { "office_space": "PKR2,100/ day", "coworking_desk": "PKR2,000/ day", "virtual_office": "PKR264/ day", "meeting_room": "PKR1,900/hr" } },
+        { "name": "Regus 298 Street 3", "area": "298 Street 3, I-9/3", "prices_from": { "office_space": "PKR1,000/ day", "coworking_desk": "PKR900/ day", "virtual_office": "PKR264/ day", "meeting_room": "PKR2,500/hr" } },
+        { "name": "Regus Karachi Center", "area": "Main G.T. Road, Dhok Paracha", "prices_from": { "office_space": "PKR900/ day", "coworking_desk": "At checkout", "virtual_office": "PKR264/ day", "meeting_room": "At checkout" } },
+        { "name": "Regus Redmarker", "area": "Main GT Road, near Amazon Mall, Sector A, DHA Phase II", "prices_from": { "office_space": "PKR1,200/ day", "coworking_desk": "At checkout", "virtual_office": "PKR264/ day", "meeting_room": "At checkout" } },
+        { "name": "Regus Paradise Bahria", "area": "Paradise Commercial, Bahria Town, beside GT Road", "prices_from": "Price on request" },
+        { "name": "Regus Gardens B-17", "area": "Gardens, B-17, near Winston Mall", "prices_from": "Price on request" }
+      ],
+      "locations_note": "The page heading says 6 locations in Islamabad but lists the 7 centres above, several of them outside central Islamabad (GT Road, DHA Phase II, Bahria Town, B-17).",
+      "services_listed": ["Individual private offices", "Dedicated coworking desk", "Day offices", "Small and large team offices", "Business address", "Virtual office plans", "Meeting rooms", "Day coworking", "Event spaces", "Conference rooms"],
+      "hours": "For customers who hold a private office or dedicated desk at a Regus center in Islamabad, their centers are accessible 24/7. For a day office, hot desk or meeting room booking, the centers are available during standard business hours.",
+      "free_trial": "Not published",
+      "tours": "You can book a tour of each centre with them.",
+      "sources": ["https://www.regus.com/en/pk/islamabad"]
     }
   },
 
