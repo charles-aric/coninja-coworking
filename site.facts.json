@@ -63,6 +63,7 @@
       "price_pkr": 14000,
       "unit": "per seat, per month",
       "for": "For freelancers and remote workers who want a proper desk away from home.",
+      "team_size": "Teams of 5 to 10 people or more can work together in the coworking space.",
       "includes": [
         "High speed fiber internet",
         "24/7 UPS power backup",
@@ -103,6 +104,7 @@
       "price_pkr_from": 55000,
       "unit": "per month",
       "for": "Privacy, comfort and a door that closes. A furnished, serviced executive office.",
+      "team_size": "A private office suits a team of 4 to 5 people.",
       "includes": [
         "Fully furnished executive office (desk, executive chair and storage in place on day one)",
         "Dedicated AC",
@@ -142,6 +144,12 @@
       "includes": []
     }
   ],
+
+  "terms": {
+    "security_deposit": "A security deposit is needed for a coworking seat, team space and a private office. The deposit is the same amount as the plan's price.",
+    "minimum_stay": "Not stated. Ask us on WhatsApp.",
+    "source": "Confirmed by CoNinja on 18 November 2026. Not yet written on the site's own pages."
+  },
 
   "price_range": "PKR 1,000 a day to PKR 55,000+ a month",
   "all_plans_include": "Every plan in our shared office space comes with internet, air conditioning and tea and coffee.",
