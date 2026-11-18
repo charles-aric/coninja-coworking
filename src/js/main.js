@@ -336,6 +336,16 @@
     });
   }
 
+  /* ---------- WhatsApp link clicks (bookings are WhatsApp only, so there are no call links) ---------- */
+  // One listener covers every wa.me link, including ones on pages written by the SEO automation.
+  // Only the page and the link's place on it are sent, never the message text.
+  document.addEventListener('click', (e) => {
+    const a = e.target instanceof Element ? e.target.closest('a[href^="https://wa.me/"]') : null;
+    if (!a) return;
+    const place = a.closest('footer') ? 'footer' : a.closest('nav, header') ? 'header' : 'page';
+    gtag('event', 'whatsapp_click', { link_location: place, page_path: window.location.pathname });
+  });
+
   /* ---------- Footer year ---------- */
   document.querySelectorAll('[data-year]').forEach((el) => { el.textContent = new Date().getFullYear(); });
 })();
