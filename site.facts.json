@@ -174,6 +174,53 @@
     "Pick your space and start"
   ],
 
+  "competitors": {
+    "_rule": "Facts about other businesses, copied from their own public pages on the date checked. A page may state one only as theirs, says when it was checked, and never presents it as a fact about CoNinja. Where a value says \"Not published\", do not estimate it. Name no winner and make no claim about a competitor that is not here.",
+    "daftarkhwan": {
+      "name": "Daftarkhwan",
+      "website": "https://www.daftarkhwan.com",
+      "checked": "18 November 2026",
+      "describes_itself_as": "Premium Coworking Spaces in Pakistan",
+      "cities": ["Lahore", "Islamabad", "Rawalpindi"],
+      "locations_listed": 11,
+      "locations": {
+        "islamabad": [
+          { "name": "Daftarkhwan North", "area": "Sector I-10/3" },
+          { "name": "Daftarkhwan Vanguard", "area": "F-5 Constitution Avenue" },
+          { "name": "Daftarkhwan Skyline", "area": "Gulberg Greens" }
+        ],
+        "rawalpindi": [
+          { "name": "Daftarkhwan Alpha", "area": "Old Airport Road, Chaklala Cantt" },
+          { "name": "Daftarkhwan Vantage", "area": "Sector F, DHA Phase 1" }
+        ],
+        "lahore": [
+          { "name": "Daftarkhwan Boulevard", "area": "Main Boulevard, Gulberg" },
+          { "name": "Daftarkhwan Vogue", "area": "MM Alam Road, Gulberg III" },
+          { "name": "Daftarkhwan Downtown", "area": "Dr. Mateen Fatima Road, Gulberg II" },
+          { "name": "Daftarkhwan One", "area": "Phase 5, DHA" },
+          { "name": "Daftarkhwan Fairways", "area": "Phase 6, DHA" },
+          { "name": "Daftarkhwan Lake City", "area": "Main Boulevard, Lake City" }
+        ]
+      },
+      "services_listed": ["Coworking", "Private Office", "Meeting Rooms", "Events Space", "Enterprise Solution", "Daftarkhwan Studio"],
+      "prices": {
+        "islamabad": "Not published",
+        "rawalpindi_flexible_seat": "Flexible seats in Rawalpindi start from Rs. 27,500, as stated on their Rawalpindi page.",
+        "private_office": "Not published",
+        "as_stated": "The prices for flexible seats vary across their locations."
+      },
+      "hours": "Not published",
+      "free_trial": "Not published",
+      "tours": "They welcome walk-ins and offer guided tours that you book with them.",
+      "sources": [
+        "https://www.daftarkhwan.com/locations",
+        "https://www.daftarkhwan.com/locations/islamabad",
+        "https://www.daftarkhwan.com/locations/rawalpindi",
+        "https://www.daftarkhwan.com/faqs"
+      ]
+    }
+  },
+
   "conflicts": [
     {
       "topic": "Are bills included with a private office?",
