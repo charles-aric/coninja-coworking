@@ -281,7 +281,7 @@ p, li, dd, blockquote { text-wrap: pretty; }
 .btn:active { transform: scale(0.98); }
 .btn .icon { width: 20px; height: 20px; }
 .btn--lg { padding: var(--s-100) var(--s-200); }
-.btn--block { width: 100%; }
+.btn--block { width: 100%; max-width: 100%; }
 .btn--light { background: var(--surface); color: var(--violet); }
 .btn--light:hover { background: var(--tint); }
 .btn--quiet { background: var(--tint); color: var(--violet); box-shadow: none; }
@@ -1320,7 +1320,16 @@ body.menu-open .nav { z-index: calc(var(--z-menu) + 1); }
   .hero__title.heading-1 { font-size: 48px; line-height: 48px; }
 }
 
+@media (max-width: 480px) {
+  /* long button labels wrap instead of overflowing their container */
+  .btn { white-space: normal; text-align: center; }
+  .btn--lg { padding: var(--s-100) var(--s-150, 12px); }
+  .form input[type="date"] { min-height: 52px; -webkit-appearance: none; appearance: none; }
+}
+
 @media (max-width: 380px) {
+  .tour { padding: var(--s-200) var(--s-100); }
+  .form { padding: var(--s-200) var(--s-150, 12px); }
   .hero__title .line { white-space: normal; }
   .hours__row { flex-wrap: wrap; gap: var(--s-50) var(--s-200); }
   .hours__row dd { text-align: left; }
