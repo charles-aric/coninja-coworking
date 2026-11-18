@@ -19,12 +19,13 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import * as esbuild from 'esbuild';
 import { minify as minifyHtml } from 'html-minifier-terser';
-import { loadPages, validatePage, renderPage } from './pages.mjs';
+import { loadPages, validatePage, renderPage, renderHub, hubsFor, hubFooterLinks, relatedLinks, fillSlots, shortTitle } from './pages.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = path.join(ROOT, 'src');
 const OUT = process.env.OUT_DIR ? path.resolve(process.env.OUT_DIR) : path.join(ROOT, 'dist');
 const PAGES_DIR = process.env.PAGES_DIR ? path.resolve(process.env.PAGES_DIR) : path.join(SRC, 'pages');
+const CONTENT_DIR = process.env.CONTENT_DIR ? path.resolve(process.env.CONTENT_DIR) : path.join(SRC, 'content');
 const config = JSON.parse(await fs.readFile(path.join(ROOT, 'site.config.json'), 'utf8'));
 
 const SITE_URL = (process.env.SITE_URL || config.url || '').replace(/\/+$/, '');
@@ -87,7 +88,7 @@ async function processImage(file, outDir, urlDir, widths) {
 }
 const originals = path.join(SRC, 'assets', 'img', 'originals');
 
-// Content pages are validated before the slow image work, so a bad file fails fast
+// Content pages and slot files are validated before the slow image work, so a bad file fails fast
 const contentPages = await loadPages(PAGES_DIR);
 {
   const ctx = {
@@ -98,6 +99,34 @@ const contentPages = await loadPages(PAGES_DIR);
   const problems = contentPages.flatMap(({ file, data }) => validatePage(data, { ...ctx, file }));
   if (problems.length) {
     console.error(`\n  Content page errors (${path.relative(ROOT, PAGES_DIR) || PAGES_DIR}):\n${problems.map((p) => `    ${p}`).join('\n')}\n`);
+    process.exit(1);
+  }
+}
+
+// Hand-written pages with data-slot copy: fill each slot from src/content/<page>.json
+const slotValues = {}; // "index" -> { key: value }
+{
+  const problems = [];
+  const contentFiles = await loadPages(CONTENT_DIR).catch((e) => { problems.push(`src/content/${e.message}`); return []; });
+  const byName = Object.fromEntries(contentFiles.map(({ file, data }) => [path.basename(file, '.json'), data]));
+  const htmlNames = config.pages.map((p) => path.basename(p.file, '.html'));
+  for (const name of Object.keys(byName)) {
+    if (!htmlNames.includes(name)) problems.push(`src/content/${name}.json: there is no src/${name}.html in site.config.json`);
+  }
+  for (const page of config.pages) {
+    const name = path.basename(page.file, '.html');
+    const source = await fs.readFile(path.join(SRC, page.file), 'utf8');
+    if (!(name in byName)) {
+      if (/\sdata-slot="/.test(source)) problems.push(`src/${page.file}: has data-slot elements but src/content/${name}.json is missing`);
+      continue;
+    }
+    const { html, errors } = fillSlots(source, byName[name], `src/content/${name}.json + src/${page.file}`);
+    problems.push(...errors);
+    page.source = html;
+    slotValues[name] = byName[name];
+  }
+  if (problems.length) {
+    console.error(`\n  Content slot errors:\n${problems.map((p) => `    ${p}`).join('\n')}\n`);
     process.exit(1);
   }
 }
@@ -168,20 +197,41 @@ function preloadFor(tag) {
   return `<link rel="preload" as="image" type="image/avif" imagesrcset="${srcset(img, 'avif')}" imagesizes="${sizes}" fetchpriority="high">`;
 }
 
-// Hand-written pages from site.config.json, then one page per src/pages/<slug>.json
+// Money pages linked from every "Related pages" block, with the title and description from their content files
+const MONEY_PAGES = ['index.html', 'private-office-islamabad.html', 'team-office-space-islamabad.html'];
+const money = MONEY_PAGES.map((file) => {
+  const page = config.pages.find((p) => p.file === file);
+  const values = slotValues[path.basename(file, '.html')] || {};
+  if (!page || !values.title || !values.description) throw new Error(`${file}: a money page needs title and description slots in src/content/`);
+  return { path: page.path, title: shortTitle(values.title), description: values.description };
+});
+const pageData = contentPages.map(({ data }) => data);
+const related = relatedLinks(pageData, money);
+const hubs = hubsFor(pageData);
+const imageFor = (name) => {
+  const img = images[`/assets/img/${name}.jpg`];
+  return { width: img.width, height: img.height, largest: img.widths[img.widths.length - 1] };
+};
+
+// Hand-written pages from site.config.json, then one page per src/pages/<slug>.json, then the hub pages
 const allPages = [
   ...config.pages,
-  ...contentPages.map(({ data }) => {
-    const img = images[`/assets/img/${data.hero_image}.jpg`];
-    return {
-      file: `${data.slug}.html`,
-      path: `/${data.slug}`,
-      priority: '0.7',
-      changefreq: 'monthly',
-      source: renderPage(data, { width: img.width, height: img.height, largest: img.widths[img.widths.length - 1] }),
-    };
-  }),
+  ...pageData.map((data) => ({
+    file: `${data.slug}.html`,
+    path: `/${data.slug}`,
+    priority: '0.7',
+    changefreq: 'monthly',
+    source: renderPage(data, imageFor(data.hero_image), related[data.slug]),
+  })),
+  ...hubs.map((hub) => ({
+    file: hub.file,
+    path: hub.path,
+    priority: '0.6',
+    changefreq: 'weekly',
+    source: renderHub(hub, imageFor(hub.hero_image)),
+  })),
 ];
+const footerHubLinks = hubFooterLinks(hubs);
 
 const htmlReport = [];
 for (const page of allPages) {
@@ -191,6 +241,7 @@ for (const page of allPages) {
     if (!(name in partials)) throw new Error(`${page.file}: missing partial "${name}"`);
     return partials[name];
   });
+  html = html.replace('%HUB_LINKS%', footerHubLinks ? `\n          ${footerHubLinks}` : '');
   html = html.replaceAll('%SITE_URL%', SITE_URL);
   html = html.replace('href="/css/styles.css"', `href="${css.url}"`);
   html = html.replace('src="/js/main.js"', `src="${js.url}"`);
@@ -198,7 +249,7 @@ for (const page of allPages) {
   html = html.replace(/<img\s[^>]*>/g, pictureFor);
   html = html.replace(/data-full="([^"]+)"/g, (m, src) => (images[src] ? `data-full="${largest(images[src], 'webp')}"` : m));
 
-  if (/%SITE_URL%|<!-- include:/.test(html)) throw new Error(`${page.file}: unresolved token`);
+  if (/%SITE_URL%|%HUB_LINKS%|%SLOT%|%FAQ_JSONLD%|<!-- include:/.test(html)) throw new Error(`${page.file}: unresolved token`);
 
   // Keep sector names like "E-11/3" on one line in visible body text (not in attributes or JSON-LD)
   html = html.replace(/(<body[\s\S]*<\/body>)/, (body) => body.replace(/>([^<]+)</g, (m, text) =>
@@ -216,6 +267,7 @@ for (const page of allPages) {
     keepClosingSlash: false,
     sortAttributes: false,
   });
+  await fs.mkdir(path.dirname(path.join(OUT, page.file)), { recursive: true });
   await fs.writeFile(path.join(OUT, page.file), min);
   htmlReport.push(`${page.file} ${(Buffer.byteLength(min) / 1024).toFixed(1)} KB`);
 }
@@ -371,3 +423,5 @@ console.log(`  css ${css.url} ${(css.bytes / 1024).toFixed(1)} KB | js ${js.url}
 console.log(`  images: ${Object.keys(images).length} sources → ${imgCount} files in assets/img`);
 console.log(`  pages: ${htmlReport.join(' | ')}`);
 if (contentPages.length) console.log(`  content pages from JSON: ${contentPages.length}`);
+if (hubs.length) console.log(`  hub pages: ${hubs.map((h) => `${h.path} (${h.pages.length})`).join(' | ')}`);
+console.log(`  pages filled from src/content: ${Object.keys(slotValues).join(', ') || 'none'}`);
